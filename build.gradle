@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.16'
+    }
+}
+
+plugins {
+    id 'idea'
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id "com.google.protobuf" version "0.8.16"
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+idea {
+    module {
+        sourceDirs += file("${projectDir}/src/generated/main/java");
+        sourceDirs += file("${projectDir}/build/generated/source/proto/main/java");
+    }
+}
+
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib"
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    // https://mvnrepository.com/artifact/io.grpc/grpc-protobuf
+    implementation group: 'io.grpc', name: 'grpc-protobuf', version: '1.37.0'
+
+    // https://mvnrepository.com/artifact/org.apache.tomcat/tomcat-annotations-api
+    implementation group: 'org.apache.tomcat', name: 'tomcat-annotations-api', version: '7.0.109'
+
+
+    // https://mvnrepository.com/artifact/io.grpc/grpc-netty-shaded
+    implementation group: 'io.grpc', name: 'grpc-netty-shaded', version: '1.37.0'
+
+    // https://mvnrepository.com/artifact/io.grpc/grpc-netty-shaded
+    implementation group: 'io.grpc', name: 'grpc-stub', version: '1.37.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.20'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.20'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        proto {
+            // In addition to the default 'src/main/proto'
+            srcDir 'src/main/protobuf'
+            srcDir 'src/main/protocolbuffers'
+            // In addition to the default '**/*.proto' (use with caution).
+            // Using an extension other than 'proto' is NOT recommended,
+            // because when proto files are published along with class files, we can
+            // only tell the type of a file from its extension.
+            include '**/*.protodevel'
+        }
+    }
+    test {
+        proto {
+            // In addition to the default 'src/test/proto'
+            srcDir 'src/test/protocolbuffers'
+        }
+    }
+}
+
+
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+    generatedFilesBaseDir = "$projectDir/src/generated"
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+
+    plugins {
+        grpc {
+            artifact = 'io.grpc:protoc-gen-grpc-java:1.0.0-pre2'
+        }
+    }
+
+}
+
+clean {
+    delete protobuf.generatedFilesBaseDir
+}
+

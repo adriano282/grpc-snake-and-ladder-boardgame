@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option java_package = "br.com.boardgame";
+option java_multiple_files = true;
+
+
+message Position {
+  int32 value = 1;
+}
+
+message Players {
+  Player players = 1;
+}
+
+message Player {
+  string uuid = 1;
+  string name = 2;
+}
+
+message RolledDie {
+  int32 value = 1;
+}
+
+message PlayRequest {
+    RolledDie die = 1;
+    Player player = 2;
+}
+
+message GameStateResponse {
+  GameState gameState = 1;
+}
+
+service BoardGameService {
+  rpc play(stream PlayRequest) returns (stream GameStateResponse);
+}
+
+message Void {}
+message GameState {
+  int32 yourPosition = 1;
+  bool finishedGame = 2;
+  bool amIWinner = 3;
+  int32 serverPosition = 4;
+}
